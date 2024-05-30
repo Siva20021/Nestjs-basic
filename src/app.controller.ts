@@ -20,7 +20,7 @@ export class AppController {
 
   @Get('wallet/:id')
   async getPostById(@Param('id') id: number): Promise<WalletModel> {
-    return this.walletService.getWalletById(id); 
+    return this.walletService.getWalletById(Number(id)); 
   }
 
   @Get('wallets')
@@ -28,15 +28,26 @@ export class AppController {
     return this.walletService.getWallets();
   }
 
-  @Post('wallet/:id')
+  @Post('wallet')
 async createWallet(
-  @Param('id') userId: number,
-  @Body() walletData: { address: string; name: string; balance: number },
+  @Body() walletData: { address: string; name: string; balance: number, userId: number },
 ): Promise<WalletModel> {
-  const { address, name, balance } = walletData;
-  return this.walletService.createWallet({ address, name, balance });
+  const { address, name, balance, userId } = walletData;
+  return this.walletService.createWallet(walletData);
 }
 
+@Put('wallet/:id')
+async updateWallet(
+  @Param('id') id: number,
+  @Body() walletData: { address: string; name: string; balance: number },
+): Promise<WalletModel> {
+  return this.walletService.updateWallet(id, { ...walletData });
+}
+
+@Delete('wallet/:id')
+async deleteWallet(@Param('id') id: number): Promise<WalletModel> {
+  return this.walletService.deleteWallet(Number(id));
+}
 
   @Post('signup')
   async signupUser(
@@ -62,11 +73,11 @@ async createWallet(
     @Param('id') id: number,
     @Body() userData: { name: string; email: string },
   ): Promise<UserModel> {
-    return this.userService.updateUser(id, { ...userData });
+    return this.userService.updateUser(Number(id), { ...userData });
   }
 
   @Delete('user/:id')
   async deleteUser(@Param('id') id: number): Promise<UserModel> {
-    return this.userService.deleteUser(id);
+    return this.userService.deleteUser(Number(id));
   }
 }

@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from './prisma.service';
 import { User, Prisma } from '@prisma/client';
-import bcrypt from 'bcrypt';
+import * as bcrypt from 'bcrypt';
 const age = 1000 * 60 * 60 * 24 * 7;
 @Injectable()
 export class UserService {
@@ -20,17 +20,18 @@ export class UserService {
   async login(credentials: { email: string; password: string }): Promise<User> {
     const { email, password } = credentials;
     const user = await this.prisma.user.findUnique({ where: { email } });
-
     if (!user) {
       throw new NotFoundException('User not found');
     }
-
-    const passwordMatch = bcrypt.compareSync(password, credentials.password);
-    if (!passwordMatch) {
+  
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) {
       throw new UnauthorizedException('Invalid credentials');
     }
+  
     return user;
   }
+  
 
   async getUserById(userId: number): Promise<User> {
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
